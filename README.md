@@ -1,4 +1,4 @@
-# game_campo_minado
+# game campo minado
 
 teste de logica e orientação a objetos
 
