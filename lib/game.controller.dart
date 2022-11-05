@@ -115,6 +115,14 @@ abstract class GameBase with Store{
         }
       }
     }
+
+    for(int eixox=0; eixox<nivel; eixox++){
+      for( int eixoy=0; eixoy<nivel; eixoy++ ) {
+        if(matriz[eixox][eixoy].isBomb) {
+          matriz[eixox][eixoy].nivelDePerigo=50; //abaixo
+        }
+      }
+    }
   }
 
 
@@ -159,10 +167,10 @@ abstract class GameBase with Store{
   //EIXO VERTICAL: onTAP -> TOPO
   Future<void> validateTop(int vertical, int horizontal, {bool? dipararDiagonal}) async{
     for (vertical = vertical; vertical >=0; vertical--) {
-      if(vertical==0) {
-        validateEsq(vertical, horizontal, dispararBottomEndTop: false);
-        validateDir(vertical, horizontal, dispararBottomEndTop: false);
-      }
+      // if(vertical==0) {
+      //   validateEsq(vertical, horizontal, dispararBottomEndTop: false);
+      //   validateDir(vertical, horizontal, dispararBottomEndTop: false);
+      // }
       if(dipararDiagonal??true) {
         validateDiagSupDir(vertical, horizontal);
         validateDiagSupEsq(vertical, horizontal);
@@ -174,10 +182,10 @@ abstract class GameBase with Store{
   //EIXO VERTICAL: onTAP -> BOTTOM
   Future<void> validateBottom(int vertical, int horizontal, {bool? dipararDiagonal}) async{
     for (vertical = vertical+1; vertical <nivel; vertical++) {
-      if(vertical==nivel-1) {
-        validateEsq(vertical, horizontal, dispararBottomEndTop: false);
-        validateDir(vertical, horizontal, dispararBottomEndTop: false);
-      }
+      // if(vertical==nivel-1) {
+      //   validateEsq(vertical, horizontal, dispararBottomEndTop: false);
+      //   validateDir(vertical, horizontal, dispararBottomEndTop: false);
+      // }
       if(dipararDiagonal??true) {
         validateDiagInfDir(vertical, horizontal);
         validateDiagInfEsq(vertical, horizontal);
