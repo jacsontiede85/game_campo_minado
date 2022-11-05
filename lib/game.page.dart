@@ -1,6 +1,7 @@
 // ignore_for_file: curly_braces_in_flow_control_structures, prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 
 import 'game.controller.dart';
 
@@ -47,42 +48,42 @@ class _GamePageState extends State<GamePage> {
                 children: vetor.map((value) =>
                     GestureDetector(
                       onSecondaryTap: value.isSelected ? null : (){
-                        setState(() {
-                          value.isUserCheckedBomb = !value.isUserCheckedBomb;
-                          if(value.isUserCheckedBomb)
-                            value.icon = Icon(Icons.flag, size: value.largura*0.6, color: Colors.redAccent,);
-                          else
-                          if(value.isBomb)
-                            value.icon = Icon(Icons.lens, size: value.largura*0.6, color: Colors.black,);
-                        });
+                        value.isUserCheckedBomb = !value.isUserCheckedBomb;
+                        if(value.isUserCheckedBomb)
+                          value.icon = Icon(Icons.flag, size: value.largura*0.6, color: Colors.redAccent,);
+                        else
+                        if(value.isBomb)
+                          value.icon = Icon(Icons.lens, size: value.largura*0.6, color: Colors.black,);
                       },
                       onTap: (value.isSelected || value.isUserCheckedBomb) ? null : (){
                         game!.onTap(game!.matriz.indexOf(vetor), vetor.indexOf(value));
-                        setState(() {
-                          value.isSelected = true;
-                          value.isUserCheckedBomb = false;
-                          value.cor = Colors.grey.shade300;
-                        });
+                        value.isSelected = true;
+                        value.isUserCheckedBomb = false;
+                        value.cor = Colors.grey.shade300;
                       },
-                      child: Container(
-                        width: value.largura,
-                        height: value.altura,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.white, width: 0.2),
-                          color: value.cor,
-                        ),
-                        child: Center(
-                          child: (value.isSelected && (value.isBomb || value.isUserCheckedBomb)) ||  value.isUserCheckedBomb
-                              ? value.icon
-                              : Text(
-                            value.isSelected ? '${value.nivelDePerigo>0 ? value.nivelDePerigo : ''}' : '',
-                            style: TextStyle(color: value.getCorNivelDePerigo(), fontSize: value.largura*0.4, fontWeight: FontWeight.bold),
+                      child: Observer(
+                        builder: (_)=>
+                          Container(
+                            width: value.largura,
+                            height: value.altura,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.white, width: 0.2),
+                              color: value.cor,
+                            ),
+                            child: Center(
+                              child: (value.isSelected && (value.isBomb || value.isUserCheckedBomb)) ||  value.isUserCheckedBomb
+                                  ? value.icon
+                                  : Text(
+                                //'${value.nivelDePerigo}',
+                                value.isSelected ? '${value.nivelDePerigo>0 ? value.nivelDePerigo : ''}' : '',
+                                style: TextStyle(color: value.getCorNivelDePerigo(), fontSize: value.largura*0.4, fontWeight: FontWeight.bold),
+                              ),
+                            ),
                           ),
-                        ),
                       ),
-                    )
+                    ),
                 ).toList(),
-              )
+              ),
           ).toList(),
         )
     );
