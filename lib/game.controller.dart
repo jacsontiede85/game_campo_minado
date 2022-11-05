@@ -5,28 +5,60 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:game_campo_minado/quadrado.class.dart';
+import 'package:mobx/mobx.dart';
+part 'game.controller.g.dart';
 
-class Game{
+class Game = GameBase with _$Game;
+abstract class GameBase with Store{
 
-  Game({required double w, required h}){
+  GameBase({required double w, required h, required this.nivel}){
     newGame(w, h);
   }
 
   List<List<Quadrado>> matriz = [];
-  int nivel = 12; //nivel eh igual a quantidade de quadrados por linha
-  int qtBomba=0;
+
+  @observable
+  int nivel = 10; //nivel eh igual a quantidade de quadrados por linha
+  double peso = 0.3; //(30% de bombas)
+
+  @observable
+  bool isDerrota=false, isVitoria=false;
 
 
   //retorna quantidade de bombas que estão no jogo
+  @computed
   int get qtBombaNoJogo{
     int qt = 0;
-    for (var vetor in matriz)
-      qt += vetor.where((element) => element.isBomb).toList().length;
+    for (var vetor in matriz) qt += vetor.where((element) => element.isBomb).toList().length;
    return qt;
+  }
+
+  @computed
+  int get qtBombaDesarmada{
+    int qt = 0;
+    for (var vetor in matriz) qt += vetor.where((element) => element.isUserCheckedBomb).toList().length;
+    return qt;
+  }
+
+  @computed
+  int get qtIsChecked{
+    int qt = 0;
+    for (var vetor in matriz) qt += vetor.where((element) => element.isSelected).toList().length;
+    return qt;
+  }
+
+
+  get validarVitoria{
+    int check = 0, qtBombaDesativadaValida=0;
+    for (var vetor in matriz) check += vetor.where((element) => element.isSelected).toList().length;
+    for (var vetor in matriz) qtBombaDesativadaValida += vetor.where((element) => element.isUserCheckedBomb && element.isBomb).toList().length;
+    if(qtBombaDesativadaValida == qtBombaNoJogo  &&  check == (nivel*nivel) && qtBombaNoJogo == qtBombaDesarmada)
+      isVitoria = true;
   }
 
   //criar novo jogo
   newGame(w, h){
+    isDerrota=false; isVitoria=false;
     matriz = [];
     if(nivel<2) nivel = 2;//<2 causara bug por loop
     int totalQuadradosNoJogo = (nivel*nivel);
@@ -53,7 +85,6 @@ class Game{
 
     //definir bombas no jogo de modo randomico
     var rng = Random();
-    double peso = 0.1;
     int qtbomb = (totalQuadradosNoJogo*peso).floor()==0 ? 2 : (totalQuadradosNoJogo*peso).floor();
     while( qtbomb > qtBombaNoJogo ) {
       int posicaoX = rng.nextInt(nivel);
@@ -87,19 +118,42 @@ class Game{
   }
 
 
+  explodirTodasAsBombas() async{
+    for(var vetor in matriz)
+      for(var value in vetor){
+        if(value.isBomb){
+          value.isSelected=true;
+          value.cor = Colors.redAccent.shade200.withOpacity(0.5);
+          await Future.delayed(Duration(milliseconds: 100));
+        }
+      }
+    isDerrota = true;
+  }
+
 
 
 
   //############### VALIDATE: ESPAÇOS BRANCOS (NIVEL DE PERIGO ZERO) ################
   //INICIO VALIDATE
   onTap(int vertical, int horizontal){
-    if(matriz[vertical][horizontal].nivelDePerigo==0)
-      try{
-        validateTop(vertical, horizontal);
-        validateBottom(vertical, horizontal);
-        validateEsq(vertical, horizontal);
-        validateDir(vertical, horizontal);
-      }catch(e){}
+    matriz[vertical][horizontal].isSelected = true;
+    matriz[vertical][horizontal].isUserCheckedBomb = false;
+    if(!matriz[vertical][horizontal].isBomb) matriz[vertical][horizontal].cor = Colors.grey.shade300;
+
+    if(matriz[vertical][horizontal].isBomb) {
+      matriz[vertical][horizontal].isSelected=true;
+      matriz[vertical][horizontal].cor = Colors.redAccent.shade200.withOpacity(0.5);
+      explodirTodasAsBombas();
+    }else
+      if(matriz[vertical][horizontal].nivelDePerigo==0)
+        try{
+          validateTop(vertical, horizontal);
+          validateBottom(vertical, horizontal);
+          validateEsq(vertical, horizontal);
+          validateDir(vertical, horizontal);
+        }catch(e){}
+
+    validarVitoria;
   }
 
   //EIXO VERTICAL: onTAP -> TOPO
@@ -121,8 +175,8 @@ class Game{
   Future<void> validateBottom(int vertical, int horizontal, {bool? dipararDiagonal}) async{
     for (vertical = vertical+1; vertical <nivel; vertical++) {
       if(vertical==nivel-1) {
-        validateEsq(vertical, horizontal, dispararBottomEndTop: true);
-        validateDir(vertical, horizontal, dispararBottomEndTop: true);
+        validateEsq(vertical, horizontal, dispararBottomEndTop: false);
+        validateDir(vertical, horizontal, dispararBottomEndTop: false);
       }
       if(dipararDiagonal??true) {
         validateDiagInfDir(vertical, horizontal);
@@ -209,7 +263,7 @@ class Game{
   Future<bool> onVerify(int vertical, int horizontal) async{
     //CRIAR UM PAUSA RANDOMICA
     var rng = Random();
-    int tempo = rng.nextInt(1500);
+    int tempo = rng.nextInt(100);
 
     // var p = onProtegeBorda(vertical, horizontal); //função para não permitir que o index da matriz seja estourado
     // vertical = p[0]; horizontal = p[1];
