@@ -165,20 +165,21 @@ abstract class GameBase with Store{
   Future<void> move(int vertical, int horizontal) async{
     try{
       await Future.delayed(Duration(milliseconds: 20));
+
       //TOP
       if(vertical-1 >=0)
-      if(!matriz[vertical-1][horizontal].isSelected){
-        if(matriz[vertical-1][horizontal].nivelDePerigo == 0){
-          matriz[vertical-1][horizontal].isSelected = true;
-          matriz[vertical-1][horizontal].cor = Colors.grey.shade300;
-          move(vertical-1, horizontal);
-        }else{
-          if(!matriz[vertical-1][horizontal].isBomb) {
+        if(!matriz[vertical-1][horizontal].isSelected){
+          if(matriz[vertical-1][horizontal].nivelDePerigo == 0){
             matriz[vertical-1][horizontal].isSelected = true;
             matriz[vertical-1][horizontal].cor = Colors.grey.shade300;
+            move(vertical-1, horizontal);
+          }else{
+            if(!matriz[vertical-1][horizontal].isBomb) {
+              matriz[vertical-1][horizontal].isSelected = true;
+              matriz[vertical-1][horizontal].cor = Colors.grey.shade300;
+            }
           }
         }
-      }
 
       //BOTTOM
       if(vertical+1 < nivel)
@@ -225,7 +226,72 @@ abstract class GameBase with Store{
           }
         }
 
+      if(matriz[vertical][horizontal].nivelDePerigo == 0){
+        setDiagonalSelected(vertical, horizontal);
+      }
     }catch(e){
+    }
+  }
+
+
+
+  Future<void> setDiagonalSelected(int vertical, int horizontal) async{
+    if(vertical-1 >=0 && horizontal-1>=0)
+      if(matriz[vertical][horizontal].nivelDePerigo==0 && matriz[vertical][horizontal-1].nivelDePerigo>0 && matriz[vertical+1][horizontal].nivelDePerigo>0){
+        if(matriz[vertical-1][horizontal-1].nivelDePerigo==0)
+          move(vertical-1, horizontal-1);
+        else{
+          matriz[vertical+1][horizontal-1].isSelected = true;
+          matriz[vertical+1][horizontal-1].cor = Colors.grey.shade300;
+        }
+      }
+
+    if(vertical+1 <nivel && horizontal+1 <nivel)
+      if(matriz[vertical][horizontal].nivelDePerigo==0 && matriz[vertical+1][horizontal].nivelDePerigo>0 && matriz[vertical][horizontal+1].nivelDePerigo>0){
+        if(matriz[vertical+1][horizontal+1].nivelDePerigo==0)
+          move(vertical+1, horizontal+1);
+        else{
+          matriz[vertical+1][horizontal+1].isSelected = true;
+          matriz[vertical+1][horizontal+1].cor = Colors.grey.shade300;
+        }
+      }
+
+    if(vertical-1 >=0 && horizontal+1<nivel)
+      if(matriz[vertical][horizontal].nivelDePerigo==0 && matriz[vertical-1][horizontal].nivelDePerigo>0 && matriz[vertical][horizontal+1].nivelDePerigo>0){
+        if(matriz[vertical-1][horizontal+1].nivelDePerigo==0)
+          move(vertical-1, horizontal+1);
+        else{
+          matriz[vertical-1][horizontal+1].isSelected = true;
+          matriz[vertical-1][horizontal+1].cor = Colors.grey.shade300;
+        }
+      }
+
+    if(vertical+1 <nivel && horizontal-1 >=0)
+      if(matriz[vertical][horizontal].nivelDePerigo==0 && matriz[vertical+1][horizontal].nivelDePerigo>0 && matriz[vertical][horizontal-1].nivelDePerigo>0){
+        if(matriz[vertical+1][horizontal-1].nivelDePerigo==0)
+          move(vertical+1, horizontal-1);
+        else{
+          matriz[vertical+1][horizontal-1].isSelected = true;
+          matriz[vertical+1][horizontal-1].cor = Colors.grey.shade300;
+        }
+      }
+
+    if(vertical-1 >=0 && horizontal-1>=0)
+      if(matriz[vertical][horizontal].nivelDePerigo==0 && matriz[vertical-1][horizontal].nivelDePerigo>0 && matriz[vertical][horizontal-1].nivelDePerigo>0){
+        matriz[vertical-1][horizontal-1].isSelected = true;
+        matriz[vertical-1][horizontal-1].cor = Colors.grey.shade300;
+      }
+
+
+    if(vertical+1==nivel && horizontal+1<nivel && matriz[vertical][horizontal].nivelDePerigo==0){
+      if(horizontal+1<nivel){
+        matriz[vertical][horizontal+1].isSelected = true;
+        matriz[vertical][horizontal+1].cor = Colors.grey.shade300;
+      }
+      if(horizontal-1>=0){
+        matriz[vertical][horizontal-1].isSelected = true;
+        matriz[vertical][horizontal-1].cor = Colors.grey.shade300;
+      }
     }
   }
   //############### VALIDATE: ESPAÇOS BRANCOS (NIVEL DE PERIGO ZERO) ################ fim

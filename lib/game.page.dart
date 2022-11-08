@@ -19,7 +19,7 @@ class _GamePageState extends State<GamePage> {
   bool loading = true;
   late Game game;
   String _nivel = 'Médio';
-  int _valNivel=5;
+  int _valNivel=10;
 
   @override
   void initState() {
@@ -44,7 +44,7 @@ class _GamePageState extends State<GamePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Column(
+          title: loading ? null : Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
