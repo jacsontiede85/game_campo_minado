@@ -19,7 +19,7 @@ abstract class GameBase with Store{
 
   @observable
   int nivel = 10; //nivel eh igual a quantidade de quadrados por linha
-  double peso = 0.3; //(30% de bombas)
+  double peso = 0.10; //(10% de bombas)
 
   @observable
   bool isDerrota=false, isVitoria=false;
@@ -155,146 +155,77 @@ abstract class GameBase with Store{
     }else
       if(matriz[vertical][horizontal].nivelDePerigo==0)
         try{
-          validateTop(vertical, horizontal);
-          validateBottom(vertical, horizontal);
-          validateEsq(vertical, horizontal);
-          validateDir(vertical, horizontal);
+          move(vertical, horizontal);
         }catch(e){}
 
     validarVitoria;
   }
 
-  //EIXO VERTICAL: onTAP -> TOPO
-  Future<void> validateTop(int vertical, int horizontal, {bool? dipararDiagonal}) async{
-    for (vertical = vertical; vertical >=0; vertical--) {
-      // if(vertical==0) {
-      //   validateEsq(vertical, horizontal, dispararBottomEndTop: false);
-      //   validateDir(vertical, horizontal, dispararBottomEndTop: false);
-      // }
-      if(dipararDiagonal??true) {
-        validateDiagSupDir(vertical, horizontal);
-        validateDiagSupEsq(vertical, horizontal);
-      }
-      if( await onVerify(vertical, horizontal) ) break;
-    }
-  }
 
-  //EIXO VERTICAL: onTAP -> BOTTOM
-  Future<void> validateBottom(int vertical, int horizontal, {bool? dipararDiagonal}) async{
-    for (vertical = vertical+1; vertical <nivel; vertical++) {
-      // if(vertical==nivel-1) {
-      //   validateEsq(vertical, horizontal, dispararBottomEndTop: false);
-      //   validateDir(vertical, horizontal, dispararBottomEndTop: false);
-      // }
-      if(dipararDiagonal??true) {
-        validateDiagInfDir(vertical, horizontal);
-        validateDiagInfEsq(vertical, horizontal);
-      }
-      if( await onVerify(vertical, horizontal) ) break;
-    }
-  }
-
-
-  //VALIDATE: onTAP -> ESQUERDA
-  Future<void> validateEsq(int vertical, int horizontal, {bool? dispararBottomEndTop}) async{
-    for (horizontal = horizontal-1; horizontal >= 0; horizontal--) {
-      if(dispararBottomEndTop??true){//quanto estiver na borda da matriz
-        validateDiagSupEsq(vertical, horizontal);
-        validateDiagInfEsq(vertical, horizontal);
-        await Future.delayed(Duration(microseconds: 500));
-        validateTop(vertical, horizontal, dipararDiagonal: true);
-        validateBottom(vertical, horizontal, dipararDiagonal: true);
-      }
-      if( await onVerify(vertical, horizontal) ) break;
-    }
-  }
-
-  //VALIDATE: onTAP -> DIREITA
-  Future<void> validateDir(int vertical, int horizontal, {bool? dispararBottomEndTop}) async{
-    for (horizontal = horizontal+1; horizontal < nivel; horizontal++) {
-      if(dispararBottomEndTop??true){//quanto estiver na borda da matriz
-        validateDiagSupDir(vertical, horizontal);
-        validateDiagInfDir(vertical, horizontal);
-        await Future.delayed(Duration(microseconds: 500));
-        validateTop(vertical, horizontal, dipararDiagonal: true);
-        validateBottom(vertical, horizontal, dipararDiagonal: true);
-      }
-      if( await onVerify(vertical, horizontal) ) break;
-    }
-  }
-
-
-  //VALIDATE: DIAGONAL
-  Future<void> validateDiagSupDir(int vertical, int horizontal) async{
-    vertical-=1;
-    for (vertical = vertical; vertical >=0; vertical--) {
-      horizontal++;
-      if( await onVerify(vertical, horizontal) ) break;
-    }
-  }
-
-  Future<void> validateDiagSupEsq(int vertical, int horizontal) async{
-    vertical-=1;
-    for (vertical = vertical; vertical >=0; vertical--) {
-      horizontal--;
-      if( await onVerify(vertical, horizontal) ) break;
-    }
-  }
-
-  Future<void> validateDiagInfDir(int vertical, int horizontal) async{
-    vertical+=1;
-    for (vertical = vertical; vertical <nivel; vertical++) {
-      horizontal++;
-      if( await onVerify(vertical, horizontal) ) break;
-    }
-  }
-
-  Future<void> validateDiagInfEsq(int vertical, int horizontal) async{
-    vertical+=1;
-    for (vertical = vertical; vertical <nivel; vertical++) {
-      horizontal--;
-      if( await onVerify(vertical, horizontal) ) break;
-    }
-  }
-
-
-  //VALIDATE: VERIFICAÇÃO
-  //função para não permitir que o index da matriz seja estourado
-  onProtegeBorda(int vertical, int horizontal){
-    if(vertical<0) vertical=0;
-    else if(vertical>nivel) vertical=nivel;
-    if(horizontal<0) horizontal=0;
-    else if(horizontal>nivel) horizontal=nivel;
-    return [vertical, horizontal];
-  }
-
-  Future<bool> onVerify(int vertical, int horizontal) async{
-    //CRIAR UM PAUSA RANDOMICA
-    var rng = Random();
-    int tempo = rng.nextInt(100);
-
-    // var p = onProtegeBorda(vertical, horizontal); //função para não permitir que o index da matriz seja estourado
-    // vertical = p[0]; horizontal = p[1];
-
+  Future<void> move(int vertical, int horizontal) async{
     try{
-      print('position $vertical, $horizontal -> Perigo: ${matriz[vertical][horizontal].nivelDePerigo}  verify: ${matriz[vertical][horizontal].isSelected}');
-      await Future.delayed(Duration(milliseconds: tempo));
-
-      if(matriz[vertical][horizontal].nivelDePerigo == 0) {
-        matriz[vertical][horizontal].isSelected = true;
-        matriz[vertical][horizontal].cor = Colors.grey.shade300;
-        //matriz[vertical][horizontal].cor = Colors.red.shade400.withOpacity(0.5);
-        return false;
-      }else{
-        if(!matriz[vertical][horizontal].isBomb) {
-          matriz[vertical][horizontal].isSelected = true;
-          matriz[vertical][horizontal].cor = Colors.grey.shade300;
-          // matriz[vertical][horizontal].cor = Colors.blue.withOpacity(0.3);
+      await Future.delayed(Duration(milliseconds: 20));
+      //TOP
+      if(vertical-1 >=0)
+      if(!matriz[vertical-1][horizontal].isSelected){
+        if(matriz[vertical-1][horizontal].nivelDePerigo == 0){
+          matriz[vertical-1][horizontal].isSelected = true;
+          matriz[vertical-1][horizontal].cor = Colors.grey.shade300;
+          move(vertical-1, horizontal);
+        }else{
+          if(!matriz[vertical-1][horizontal].isBomb) {
+            matriz[vertical-1][horizontal].isSelected = true;
+            matriz[vertical-1][horizontal].cor = Colors.grey.shade300;
+          }
         }
-        return true;
       }
+
+      //BOTTOM
+      if(vertical+1 < nivel)
+        if(!matriz[vertical+1][horizontal].isSelected){
+          if(matriz[vertical+1][horizontal].nivelDePerigo == 0){
+            matriz[vertical+1][horizontal].isSelected = true;
+            matriz[vertical+1][horizontal].cor = Colors.grey.shade300;
+            move(vertical+1, horizontal);
+          }else{
+            if(!matriz[vertical+1][horizontal].isBomb) {
+              matriz[vertical+1][horizontal].isSelected = true;
+              matriz[vertical+1][horizontal].cor = Colors.grey.shade300;
+            }
+          }
+        }
+
+      //LEFT
+      if(horizontal-1 >=0)
+        if(!matriz[vertical][horizontal-1].isSelected){
+          if(matriz[vertical][horizontal-1].nivelDePerigo == 0){
+            matriz[vertical][horizontal-1].isSelected = true;
+            matriz[vertical][horizontal-1].cor = Colors.grey.shade300;
+            move(vertical, horizontal-1);
+          }else{
+            if(!matriz[vertical][horizontal-1].isBomb) {
+              matriz[vertical][horizontal-1].isSelected = true;
+              matriz[vertical][horizontal-1].cor = Colors.grey.shade300;
+            }
+          }
+        }
+
+      //RIGTH
+      if(horizontal+1 < nivel)
+        if(!matriz[vertical][horizontal+1].isSelected){
+          if(matriz[vertical][horizontal+1].nivelDePerigo == 0){
+            matriz[vertical][horizontal+1].isSelected = true;
+            matriz[vertical][horizontal+1].cor = Colors.grey.shade300;
+            move(vertical, horizontal+1);
+          }else{
+            if(!matriz[vertical][horizontal+1].isBomb) {
+              matriz[vertical][horizontal+1].isSelected = true;
+              matriz[vertical][horizontal+1].cor = Colors.grey.shade300;
+            }
+          }
+        }
+
     }catch(e){
-      return false;
     }
   }
   //############### VALIDATE: ESPAÇOS BRANCOS (NIVEL DE PERIGO ZERO) ################ fim
