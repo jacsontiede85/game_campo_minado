@@ -153,6 +153,7 @@ class _GamePageState extends State<GamePage> {
                                     height: value.altura,
                                     decoration: BoxDecoration(
                                       border: Border.all(color: Colors.white, width: 0.2),
+                                      borderRadius: BorderRadius.all(Radius.circular(2)),
                                       color: value.cor,
                                     ),
                                     child: Center(

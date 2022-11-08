@@ -237,12 +237,12 @@ abstract class GameBase with Store{
 
   Future<void> setDiagonalSelected(int vertical, int horizontal) async{
     if(vertical-1 >=0 && horizontal-1>=0)
-      if(matriz[vertical][horizontal].nivelDePerigo==0 && matriz[vertical][horizontal-1].nivelDePerigo>0 && matriz[vertical+1][horizontal].nivelDePerigo>0){
+      if(matriz[vertical][horizontal].nivelDePerigo==0 && matriz[vertical][horizontal-1].nivelDePerigo>0 && matriz[vertical-1][horizontal].nivelDePerigo>0){
         if(matriz[vertical-1][horizontal-1].nivelDePerigo==0)
           move(vertical-1, horizontal-1);
         else{
-          matriz[vertical+1][horizontal-1].isSelected = true;
-          matriz[vertical+1][horizontal-1].cor = Colors.grey.shade300;
+          matriz[vertical-1][horizontal-1].isSelected = true;
+          matriz[vertical-1][horizontal-1].cor = Colors.grey.shade300;
         }
       }
 
