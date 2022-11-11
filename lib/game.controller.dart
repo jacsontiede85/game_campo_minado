@@ -164,7 +164,7 @@ abstract class GameBase with Store{
 
   Future<void> move(int vertical, int horizontal) async{
     try{
-      await Future.delayed(Duration(milliseconds: 20));
+      await Future.delayed(Duration(milliseconds: 10));
 
       //TOP
       if(vertical-1 >=0)
